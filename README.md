@@ -1,4 +1,17 @@
 
+# 🚂 NITRTC - National Inter-city Train Reservation Center
+
+## ✨ New Premium UI Redesign (2026)
+The project has been upgraded with a modern, high-end "Premium Light" interface featuring:
+- **Clean Aesthetics**: Apple-inspired design with soft shadows and gradients.
+- **Glassmorphism**: Translucent UI components.
+- **Responsive Design**: Built with modern CSS Grid/Flexbox.
+- **Supabase Integration**: Direct cloud database connectivity.
+
+![New Premium UI](screenshots/premium_ui.png)
+
+---
+
 ### About:
 This project is about the Train-Ticket-Reservation-System which is used to view Train Schedule, search trains, Seat availability, Train timings. We can also enquire about fare of different trains. We can get information about train between two stations. We can book seats online. This provides a safe and secure seat reservation system. 
 ### Online Train Information and Reservation

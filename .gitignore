@@ -1,2 +1,7 @@
-/build/
-/target/
+node_modules/
+.settings/
+.project
+.classpath
+target/
+*.class
+.DS_Store
