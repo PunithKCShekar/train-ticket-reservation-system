@@ -164,39 +164,23 @@ SELECT * FROM TRAIN;
 SELECT * FROM HISTORY;
 
 ```
-### The Screenshots of some of the  webPages of this project are Here:
+### 📸 New Premium UI Screenshots
 
-1. Login Page
-<img width="100%" alt="Login to Book Trains" src="https://user-images.githubusercontent.com/34605595/232219369-85b55a1d-6640-4821-941a-dcca08036fbe.png">
+1. **User Login Page (Home)**
+![User Login](Screenshots/login.png)
 
-2. Register New User
-<img width="100%" alt="Register New User" src="https://user-images.githubusercontent.com/34605595/232219485-2b00949a-be20-44f7-b6c1-107213221f94.png">
+2. **User Registration**
+![Register User](Screenshots/registeruser.png)
 
-3. User Profile
-<img width="100%" alt="View User Profile" src="https://user-images.githubusercontent.com/34605595/232219729-2720e50f-e14b-4253-831a-85c59e3054b3.png">
+3. **User Dashboard**
+![User Home](Screenshots/userhome.png)
 
-4. Search Trains Between Stations
-<img width="100%" alt="Search Trains Between Stations" src="https://user-images.githubusercontent.com/34605595/232220357-54b634d6-afae-427c-b3af-57b372b70906.png">
+4. **Admin Secure Login**
+![Admin Login](Screenshots/admin_login.png)
 
-5. View Trains
-<img width="100%" alt="View Available Trains" src="https://user-images.githubusercontent.com/34605595/232219905-983eeefe-977b-40ad-a695-4ec577272dcc.png">
+5. **Admin Management Dashboard**
+![Admin Home](Screenshots/adminhome.png)
 
-7. Book Trains
-<img width="100%" alt="Book Trains Project" src="https://user-images.githubusercontent.com/34605595/232220107-415b251f-90b9-4e70-aff8-e94d370927f6.png">
-
-8. Payment Gateway
-<img width="100%" alt="Pay to Book Trains" src="https://user-images.githubusercontent.com/34605595/232220744-351c2c6d-e1f6-49ad-a11b-7680aa63dbe3.png">
-
-9. Booked Ticket Information
-<img width="100%" alt="Show Booked Ticket Details" src="https://user-images.githubusercontent.com/34605595/232220935-654bda38-cbde-4203-84b8-3078a32ac6ec.png">
-
-10. Ticket Booking History
-<img width="100%" alt="All Ticket Booking History" src="https://user-images.githubusercontent.com/34605595/232220491-3e7996cb-a54c-4375-a35a-6ab1d211a001.png">
-
-11. Fare Enquiry
-<img alt="Fare Enquiry between stations" src="https://github.com/shashirajraja/Train-Ticket-Reservation-System/blob/master/Screenshots/fareenquiry.png" width="100%">
-
-12. Change Password
-<img alt="Change user Password" src="https://github.com/shashirajraja/Train-Ticket-Reservation-System/blob/master/Screenshots/passwordchange.png" width="100%">
+---
 
 
