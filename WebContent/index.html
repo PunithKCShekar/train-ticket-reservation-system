@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="ISO-8859-1">
+	<title>NITRTC | National Ticket Booking</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="UserHome_Css.css">
+	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+	<script>
+		const supabaseClient = supabase.createClient(
+			'https://cztenfsxtgxhzshhpzzg.supabase.co',
+			'sb_publishable_Fj7xwztVaTNDwqNgCgHRMQ_TD5hdbmP'
+		)
+
+		async function checkConnection() {
+			const { data, error } = await supabaseClient.from('customer').select('count', { count: 'exact', head: true });
+			const statusDiv = document.getElementById('db-status');
+			if (error) {
+				statusDiv.innerHTML = '❌ Database Error: ' + error.message;
+				statusDiv.style.color = '#ef4444';
+			} else {
+				statusDiv.innerHTML = '✅ Supabase Connected';
+				statusDiv.style.color = '#10b981';
+			}
+		}
+
+		async function handleLogin(event) {
+			event.preventDefault();
+			const email = document.getElementsByName('uname')[0].value;
+			const password = document.getElementsByName('pword')[0].value;
+
+			const { data, error } = await supabaseClient
+				.from('customer')
+				.select('*')
+				.eq('mailid', email)
+				.eq('pword', password)
+				.single();
+
+			if (error || !data) {
+				alert('Invalid User Credentials!');
+			} else {
+				alert('Login Successful! Welcome ' + data.fname);
+				sessionStorage.setItem('user', JSON.stringify(data));
+				window.location.href = 'UserHome.html';
+			}
+		}
+
+		window.onload = checkConnection;
+	</script>
+</head>
+
+<body>
+	<header>
+		<h1 class="hd">National Ticket Booking Spot</h1>
+		<div id="db-status">Checking Database Connection...</div>
+		
+		<nav class="home-container" style="margin-top: 2rem;">
+			<a href="UserHome.html" class="menu">Home</a>
+			<a href="UserViewTrains.html" class="menu">View Trains</a>
+			<a href="TrainBwStn.html" class="menu">Trains Between Stations</a>
+			<a href="BookTrains.html" class="menu">Booking History</a>
+			<a href="Fare.html" class="menu">Fare Enquiry</a>
+			<a href="Availability.html" class="menu">Seat Availability</a>
+			<a href="SearchTrains.html" class="menu">Search By TrainNo</a>
+			<a href="Profile.html" class="menu">Profile</a>
+			<a href="AdminLogin.html" class="menu" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2);">Admin Login</a>
+		</nav>
+	</header>
+
+	<main class="tab">
+		<h2 class="tab green" style="background: none; border: none; padding: 0;">User Login</h2>
+		<p style="color: var(--text-muted); margin-bottom: 2rem;">Access your account to book tickets</p>
+		
+		<form onsubmit="handleLogin(event)">
+			<div>
+				<label style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem;">USERNAME / EMAIL</label>
+				<input type="text" name="uname" placeholder="Enter your registered email">
+			</div>
+			<div>
+				<label style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem;">PASSWORD</label>
+				<input type="password" name="pword" placeholder="••••••••">
+			</div>
+			<input type="submit" value="Sign In to Your Account">
+		</form>
+		
+		<div style="margin-top: 2rem; text-align: center; font-size: 0.875rem;">
+			<span style="color: var(--text-muted);">Don't have an account?</span> 
+			<a href="UserRegister.html" style="color: var(--primary); text-decoration: none; font-weight: 600;">Register Now</a>
+		</div>
+	</main>
+
+	<footer>
+		<address>
+			<strong>NITRTC Support Team</strong><br>
+			Contact: Mr. Shashi Raj | <a href="mailto:thebittercode@gmail.com">thebittercode@gmail.com</a><br>
+			Phone: +91 9876543210
+		</address>
+	</footer>
+</body>
+</html>

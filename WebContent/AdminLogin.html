@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="ISO-8859-1">
+	<title>Admin Login | NITRTC</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="UserHome_Css.css">
+	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+	<script>
+		const supabaseClient = supabase.createClient(
+			'https://cztenfsxtgxhzshhpzzg.supabase.co',
+			'sb_publishable_Fj7xwztVaTNDwqNgCgHRMQ_TD5hdbmP'
+		)
+
+		async function handleLogin(event) {
+			event.preventDefault();
+			const email = document.getElementsByName('uname')[0].value;
+			const password = document.getElementsByName('pword')[0].value;
+
+			const { data, error } = await supabaseClient
+				.from('admin')
+				.select('*')
+				.eq('mailid', email)
+				.eq('pword', password)
+				.single();
+
+			if (error || !data) {
+				alert('Invalid Admin Credentials!');
+			} else {
+				alert('Login Successful! Welcome ' + data.fname);
+				sessionStorage.setItem('admin', JSON.stringify(data));
+				window.location.href = 'AdminHome.html';
+			}
+		}
+	</script>
+</head>
+
+<body>
+	<header>
+		<h1 class="hd">National Ticket Booking Spot</h1>
+		<nav class="home-container" style="margin-top: 1rem;">
+			<a href="index.html" class="menu">User Login</a>
+			<a href="UserRegister.html" class="menu">New Registration</a>
+			<a href="AdminLogin.html" class="menu" style="background: var(--primary);">Admin Portal</a>
+		</nav>
+	</header>
+
+	<main class="tab" style="max-width: 500px;">
+		<h2 class="tab green" style="background: none; border: none; padding: 0; color: #f59e0b;">Admin Secure Login
+		</h2>
+		<p style="color: var(--text-muted); margin-bottom: 2rem;">Authorized Personnel Only</p>
+
+		<form onsubmit="handleLogin(event)">
+			<div>
+				<label style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem;">ADMIN ID</label>
+				<input type="text" name="uname" placeholder="Admin Email ID">
+			</div>
+			<div>
+				<label style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem;">PASSWORD</label>
+				<input type="password" name="pword" placeholder="••••••••">
+			</div>
+			<input type="submit" value="Access Admin Dashboard"
+				style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+		</form>
+	</main>
+
+	<footer style="margin-top: 5rem;">
+		<p>&copy; 2026 NITRTC System Administration</p>
+	</footer>
+</body>
+
+</html>

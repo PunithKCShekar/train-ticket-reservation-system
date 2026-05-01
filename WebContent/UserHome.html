@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="ISO-8859-1">
+	<title>User Dashboard | NITRTC</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="UserHome_Css.css">
+	<script>
+		window.onload = () => {
+			const user = JSON.parse(sessionStorage.getItem('user'));
+			if (!user) {
+				alert('Please login to access this page.');
+				window.location.href = 'index.html';
+			} else {
+				document.getElementById('user-name').innerText = user.fname;
+			}
+		};
+	</script>
+</head>
+<body>
+	<header>
+		<h1 class="hd">National Ticket Booking Spot</h1>
+		<nav class="home-container">
+			<a href="UserHome.html" class="menu" style="background: var(--primary);">Home</a>
+			<a href="UserViewTrains.html" class="menu">View Trains</a>
+			<a href="TrainBwStn.html" class="menu">Search Route</a>
+			<a href="BookTrains.html" class="menu">My Bookings</a>
+			<a href="Fare.html" class="menu">Fare Enquiry</a>
+			<a href="Availability.html" class="menu">Seats</a>
+			<a href="Profile.html" class="menu">My Profile</a>
+			<a href="index.html" class="menu" onclick="sessionStorage.clear()" style="background: rgba(239, 68, 68, 0.1);">Logout</a>
+		</nav>
+	</header>
+	
+	<main class="tab" style="max-width: 800px; text-align: left;">
+		<div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 3rem;">
+			<div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 800; box-shadow: 0 10px 20px -5px var(--primary);">
+				U
+			</div>
+			<div>
+				<h2 style="font-size: 2rem;">Hello, <span id="user-name" style="color: var(--accent);">Passenger</span></h2>
+				<p style="color: var(--text-muted);">Where would you like to go today?</p>
+			</div>
+		</div>
+
+		<div style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); display: grid; gap: 2rem;">
+			<div class="tab" style="margin: 0 !important; width: 100% !important; padding: 2rem; text-align: left;">
+				<h3 style="margin-bottom: 1rem; color: var(--accent);">Quick Actions</h3>
+				<ul style="list-style: none; display: flex; flex-direction: column; gap: 1rem;">
+					<li><a href="TrainBwStn.html" style="color: var(--text-main); text-decoration: none;">🔍 Search Trains Between Stations</a></li>
+					<li><a href="UserViewTrains.html" style="color: var(--text-main); text-decoration: none;">📋 View All Running Trains</a></li>
+					<li><a href="BookTrains.html" style="color: var(--text-main); text-decoration: none;">🎟️ Check My Ticket History</a></li>
+				</ul>
+			</div>
+			
+			<div class="tab" style="margin: 0 !important; width: 100% !important; padding: 2rem; text-align: left; background: linear-gradient(rgba(30, 41, 59, 0.7), rgba(99, 102, 241, 0.1));">
+				<h3 style="margin-bottom: 1rem; color: var(--accent);">Travel News</h3>
+				<p style="font-size: 0.875rem; color: var(--text-muted);">
+					New super-fast express routes added between Mumbai and Delhi. Check Seat Availability for special discounts!
+				</p>
+				<button class="menu" style="margin-top: 1.5rem; width: 100%;">Read More</button>
+			</div>
+		</div>
+	</main>
+
+	<footer style="margin-top: 5rem;">
+		<p>&copy; 2026 National Inter-city Train Reservation Center</p>
+	</footer>
+</body>
+</html>

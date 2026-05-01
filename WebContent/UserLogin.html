@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>LOGIN</title>
+<link rel="stylesheet" href="UserHome_Css.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+	const supabaseClient = supabase.createClient(
+		'https://cztenfsxtgxhzshhpzzg.supabase.co',
+		'sb_publishable_Fj7xwztVaTNDwqNgCgHRMQ_TD5hdbmP'
+	)
+
+	async function handleLogin(event) {
+		event.preventDefault();
+		const email = document.getElementsByName('uname')[0].value;
+		const password = document.getElementsByName('pword')[0].value;
+
+		const { data, error } = await supabaseClient
+			.from('customer')
+			.select('*')
+			.eq('mailid', email)
+			.eq('pword', password)
+			.single();
+
+		if (error || !data) {
+			alert('Invalid User Credentials!');
+		} else {
+			alert('Login Successful! Welcome ' + data.fname);
+			sessionStorage.setItem('user', JSON.stringify(data));
+			window.location.href = 'UserHome.html';
+		}
+	}
+</script>
+</head>
+<body>
+	<header>
+		<h1 class="hd">National Ticket Booking Spot</h1>
+		<div class="main">
+			<span class="menu">
+				<a href="UserLogin.html">Login as User</a>
+			</span>
+			<span class="menu">
+				<a href="UserRegister.html">New User Register</a>
+			</span>
+			<span class="menu">
+				<a href="AdminLogin.html">Login as Admin</a>
+			</span>
+		</div>
+	</header>
+	<div class="tab green">User Login</div>
+	<form onsubmit="handleLogin(event)" class="tab brown" method="post">
+		<br /> UserName: <input type="text" name="uname"
+			placeholder="Enter Your EmailId"> <br /> <br /> Password: <input
+			type="password" name="pword"> <br /> <br /> <input
+			type="submit" value=" LOGIN "><br />
+
+	</form>
+	<br />
+</body>
+</html>
