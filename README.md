@@ -8,7 +8,7 @@ The project has been upgraded with a modern, high-end "Premium Light" interface 
 - **Responsive Design**: Built with modern CSS Grid/Flexbox.
 - **Supabase Integration**: Direct cloud database connectivity.
 
-![New Premium UI](screenshots/premium_ui.png)
+![New Premium UI](Screenshots/premium_ui.png)
 
 ---
 
