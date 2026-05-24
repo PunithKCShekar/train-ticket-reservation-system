@@ -9,8 +9,8 @@ const crypto = require('crypto');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'placeholder_key';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 app.use(cors());
@@ -194,6 +194,10 @@ app.use((req, res) => {
     res.sendFile(path.join(__dirname, 'WebContent', 'index.html'));
 });
 
-app.listen(PORT, () => {
-    console.log(`🚀 JavaScript Backend Server running on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`🚀 JavaScript Backend Server running on http://localhost:${PORT}`);
+    });
+}
+
+module.exports = app;
