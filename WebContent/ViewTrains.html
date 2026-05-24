@@ -1,55 +1,169 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="ISO-8859-1">
-<title>Trains</title>
-<link rel="stylesheet" href="UserHome_Css.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet Management | NITRTC</title>
+    <link rel="stylesheet" href="UserHome_Css.css">
 </head>
 <body>
-	<header>
-		<h1 class="hd">National Ticket Booking Spot</h1>
-		<div class="home">
-			<p class="menu">
-				<a href="AdminHome.html">Home</a>
-			</p>
-		</div>
-		<div class="home">
-			<p class="menu">
-				<a href="ViewTrains.html">View Trains</a>
-			</p>
-		</div>
-		<div class="home">
-			<p class="menu">
-				<a href="AdminSearchTrain.html">Search By TrainNo</a>
-			</p>
-		</div>
+    <header>
+        <div class="hd" style="color: #f43f5e;">NITRTC Admin</div>
+        <nav class="home-container">
+            <a href="AdminHome.html" class="menu">Dashboard</a>
+            <a href="ViewTrains.html" class="menu active" style="background: rgba(244, 63, 94, 0.2); color: #f43f5e;">Train Roster</a>
+            <a href="index.html" class="menu" style="color: var(--accent);">Logout</a>
+        </nav>
+    </header>
 
-		<div class="home">
-			<p class="menu">
-				<a href="AddTrains.html">Add Train</a>
-			</p>
-		</div>
-		<div class="home">
-			<p class="menu">
-				<a href="CancleTrain.html">Delete Train </a>
-			</p>
-		</div>
-		<div class="home">
-			<p class="menu">
-				<a href="AdminUpdateTrain.html">Update Train Details</a>
-			</p>
-		</div>
-		<div class="home">
-			<p class="menu">
-				<a href="AdminLogin.html">Logout</a>
-			</p>
-		</div>
+    <div class="container animate-up">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div>
+                <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Active <span style="color: #f43f5e;">Fleet Roster</span></h1>
+                <p style="color: var(--text-muted); font-size: 1.1rem;">Manage and monitor all trains currently in the network.</p>
+            </div>
+            <a href="AdminHome.html" style="background: #f43f5e; color: white; padding: 0.8rem 1.5rem; border-radius: 12px; text-decoration: none; font-weight: 600;">+ Add New Train</a>
+        </div>
 
-		<div class='tab'>
-			<p class='menu'>Hey, Admin ! Welcome to our new NTBS Website</p>
-		</div>
-	</header>
+        <div class="card" style="padding: 0; overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="background: #f8fafc;">
+                        <th style="padding: 1.5rem 1rem;">Train No</th>
+                        <th style="padding: 1.5rem 1rem;">Train Name</th>
+                        <th style="padding: 1.5rem 1rem;">Route</th>
+                        <th style="padding: 1.5rem 1rem;">Seats</th>
+                        <th style="padding: 1.5rem 1rem;">Fare</th>
+                        <th style="padding: 1.5rem 1rem; text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="train-table-body">
+                    <tr><td colspan="6" style="padding: 2rem; text-align: center;">Loading fleet data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal-content" style="border-top: 4px solid #f43f5e;">
+            <h2 style="margin-bottom: 1.5rem;">Edit Train Details</h2>
+            <form id="edit-form">
+                <input type="hidden" id="edit-trno">
+                <div class="form-group">
+                    <label>Train Name</label>
+                    <input type="text" id="edit-name" required>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>From</label>
+                        <input type="text" id="edit-from" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>To</label>
+                        <input type="text" id="edit-to" required>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Seats</label>
+                        <input type="number" id="edit-seats" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Fare ($)</label>
+                        <input type="number" step="0.01" id="edit-fare" required>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button type="button" class="btn-secondary" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" style="background: #f43f5e;">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', loadTrains);
+
+        async function loadTrains() {
+            const res = await fetch('/api/trains');
+            const data = await res.json();
+            const tbody = document.getElementById('train-table-body');
+            
+            if (!data.success || data.trains.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="padding: 2rem; text-align: center;">No trains found in the network.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.trains.map(t => `
+                <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                    <td style="padding: 1.5rem 1rem; font-weight: 600;">${t.tr_no}</td>
+                    <td style="padding: 1.5rem 1rem; color: #f43f5e; font-weight: 600;">${t.tr_name}</td>
+                    <td style="padding: 1.5rem 1rem;">${t.from_stn} &rarr; ${t.to_stn}</td>
+                    <td style="padding: 1.5rem 1rem;">${t.seats}</td>
+                    <td style="padding: 1.5rem 1rem;">$${t.fare}</td>
+                    <td style="padding: 1.5rem 1rem; text-align: right;">
+                        <button onclick='openEditModal(${JSON.stringify(t).replace(/'/g, "&#39;")})' style="width: auto; padding: 0.5rem 1rem; font-size: 0.8rem; background: #e2e8f0; color: #0f172a;">Edit</button>
+                        <button onclick="deleteTrain(${t.tr_no})" style="width: auto; padding: 0.5rem 1rem; font-size: 0.8rem; background: #fee2e2; color: #ef4444; margin-left: 0.5rem;">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function deleteTrain(tr_no) {
+            if(!confirm(`Are you sure you want to permanently delete Train #${tr_no}?`)) return;
+            const res = await fetch('/api/deletetrain', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tr_no })
+            });
+            const data = await res.json();
+            if(data.success) {
+                loadTrains();
+            } else {
+                alert('Failed to delete: ' + data.message);
+            }
+        }
+
+        function openEditModal(train) {
+            document.getElementById('edit-trno').value = train.tr_no;
+            document.getElementById('edit-name').value = train.tr_name;
+            document.getElementById('edit-from').value = train.from_stn;
+            document.getElementById('edit-to').value = train.to_stn;
+            document.getElementById('edit-seats').value = train.seats;
+            document.getElementById('edit-fare').value = train.fare;
+            document.getElementById('edit-modal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').style.display = 'none';
+        }
+
+        document.getElementById('edit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                tr_no: document.getElementById('edit-trno').value,
+                tr_name: document.getElementById('edit-name').value,
+                from_stn: document.getElementById('edit-from').value,
+                to_stn: document.getElementById('edit-to').value,
+                seats: document.getElementById('edit-seats').value,
+                fare: document.getElementById('edit-fare').value
+            };
+
+            const res = await fetch('/api/updatetrain', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            
+            if(data.success) {
+                closeEditModal();
+                loadTrains();
+            } else {
+                alert('Update failed: ' + data.message);
+            }
+        });
+    </script>
 </body>
 </html>

@@ -167,6 +167,29 @@ app.post('/adminlogin', async (req, res) => {
     res.redirect('/AdminHome.html');
 });
 
+// Admin Train Management APIs
+app.get('/api/trains', async (req, res) => {
+    const { data: trains, error } = await supabase.from('train').select('*').order('tr_no');
+    if (error) return res.json({ success: false, trains: [] });
+    res.json({ success: true, trains });
+});
+
+app.post('/api/updatetrain', async (req, res) => {
+    const { tr_no, tr_name, from_stn, to_stn, seats, fare } = req.body;
+    const { error } = await supabase.from('train')
+        .update({ tr_name, from_stn, to_stn, seats, fare })
+        .eq('tr_no', tr_no);
+    if (error) return res.json({ success: false, message: error.message });
+    res.json({ success: true });
+});
+
+app.post('/api/deletetrain', async (req, res) => {
+    const { tr_no } = req.body;
+    const { error } = await supabase.from('train').delete().eq('tr_no', tr_no);
+    if (error) return res.json({ success: false, message: error.message });
+    res.json({ success: true });
+});
+
 app.use((req, res) => {
     res.sendFile(path.join(__dirname, 'WebContent', 'index.html'));
 });
