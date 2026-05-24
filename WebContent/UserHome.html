@@ -1,72 +1,265 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<meta charset="ISO-8859-1">
-	<title>User Dashboard | NITRTC</title>
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
-	<link rel="stylesheet" href="UserHome_Css.css">
-	<script>
-		window.onload = () => {
-			const user = JSON.parse(sessionStorage.getItem('user'));
-			if (!user) {
-				alert('Please login to access this page.');
-				window.location.href = 'index.html';
-			} else {
-				document.getElementById('user-name').innerText = user.fname;
-			}
-		};
-	</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | NITRTC</title>
+    <link rel="stylesheet" href="UserHome_Css.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        let currentUser = null;
+        let selectedTrain = null;
+        let selectedSeats = [];
+
+        window.onload = () => {
+            currentUser = JSON.parse(sessionStorage.getItem('user'));
+            if (!currentUser) {
+                window.location.href = 'index.html';
+            } else {
+                document.getElementById('user-name').innerText = currentUser.fname;
+                loadMyBookings();
+            }
+        };
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        async function searchTrain(e) {
+            e.preventDefault();
+            const trainno = e.target.trainnumber.value;
+            const res = await fetch('/searchtrainservlet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ trainnumber: trainno })
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                selectedTrain = data.train;
+                document.getElementById('booking-panel').style.display = 'block';
+                document.getElementById('train-details').innerHTML = `
+                    <h3>${data.train.tr_name} (Train #${data.train.tr_no})</h3>
+                    <p>${data.train.from_stn} &rarr; ${data.train.to_stn}</p>
+                    <p>Fare: $${data.train.fare} per seat</p>
+                `;
+                generateSeatMap(data.train.seats);
+            } else {
+                alert(data.message);
+            }
+        }
+
+        function generateSeatMap(availableSeats) {
+            const map = document.getElementById('seat-map');
+            map.innerHTML = '';
+            selectedSeats = [];
+            document.getElementById('total-fare').innerText = '0.00';
+            
+            // Generate 30 dummy graphical seats for visualization
+            for(let i=1; i<=30; i++) {
+                const seat = document.createElement('div');
+                seat.className = i > availableSeats ? 'seat taken' : 'seat available';
+                seat.innerText = i;
+                if(i <= availableSeats) {
+                    seat.onclick = () => toggleSeat(seat, i);
+                }
+                map.appendChild(seat);
+            }
+        }
+
+        function toggleSeat(elem, seatNum) {
+            if(selectedSeats.includes(seatNum)) {
+                selectedSeats = selectedSeats.filter(s => s !== seatNum);
+                elem.classList.remove('selected');
+            } else {
+                if(selectedSeats.length >= 6) return alert("Max 6 seats per booking!");
+                selectedSeats.push(seatNum);
+                elem.classList.add('selected');
+            }
+            document.getElementById('total-fare').innerText = (selectedSeats.length * selectedTrain.fare).toFixed(2);
+            document.getElementById('checkout-btn').style.display = selectedSeats.length > 0 ? 'block' : 'none';
+        }
+
+        function showPaymentModal() {
+            document.getElementById('payment-modal').style.display = 'flex';
+        }
+
+        function closePaymentModal() {
+            document.getElementById('payment-modal').style.display = 'none';
+        }
+
+        async function processPayment(e) {
+            e.preventDefault();
+            const btn = document.getElementById('pay-btn');
+            btn.innerText = 'Processing Payment...';
+            
+            // Simulate Payment Delay
+            setTimeout(async () => {
+                const res = await fetch('/booktrains', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        trainnumber: selectedTrain.tr_no, 
+                        seats: selectedSeats.length,
+                        mailid: currentUser.mailid,
+                        amount: selectedSeats.length * selectedTrain.fare
+                    })
+                });
+                const data = await res.json();
+                
+                closePaymentModal();
+                btn.innerText = 'Pay Now';
+                
+                if (data.success) {
+                    alert(`Payment Successful! Your PNR is ${data.pnr}. An email confirmation has been sent.`);
+                    document.getElementById('booking-panel').style.display = 'none';
+                    selectedSeats = [];
+                    loadMyBookings();
+                } else {
+                    alert(data.message);
+                }
+            }, 1500);
+        }
+
+        async function loadMyBookings() {
+            const res = await fetch(`/mybookings/${currentUser.mailid}`);
+            const data = await res.json();
+            const list = document.getElementById('bookings-list');
+            list.innerHTML = '';
+            
+            if(data.success && data.bookings.length > 0) {
+                data.bookings.forEach(b => {
+                    list.innerHTML += `
+                        <div class="card" style="margin-bottom: 1rem; padding: 1.5rem;" id="ticket-${b.transid}">
+                            <h4>PNR: ${b.transid}</h4>
+                            <p>Train: ${b.tr_no} | ${b.from_stn} to ${b.to_stn}</p>
+                            <p>Seats: ${b.seats} | Paid: $${b.amount}</p>
+                            <p>Date: ${b.date}</p>
+                            <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+                                <button onclick="downloadTicket('${b.transid}')" class="btn-secondary" style="padding: 0.5rem 1rem; width: auto;">📄 Download PDF</button>
+                                <button onclick="cancelTicket('${b.transid}')" class="btn-danger" style="padding: 0.5rem 1rem; width: auto;">❌ Cancel</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                list.innerHTML = '<p>No bookings found.</p>';
+            }
+        }
+
+        async function cancelTicket(pnr) {
+            if(!confirm(`Are you sure you want to cancel booking ${pnr}?`)) return;
+            const res = await fetch('/cancelticket', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pnr })
+            });
+            const data = await res.json();
+            alert(data.message);
+            if(data.success) loadMyBookings();
+        }
+
+        function downloadTicket(pnr) {
+            const element = document.getElementById(`ticket-${pnr}`);
+            html2pdf().from(element).save(`Ticket-${pnr}.pdf`);
+        }
+    </script>
+    <style>
+        .seat {
+            width: 40px; height: 40px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: bold; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .seat.available { background: #e8e8ed; color: var(--text-main); }
+        .seat.available:hover { background: #d2d2d7; }
+        .seat.taken { background: #ff3b30; color: white; opacity: 0.5; cursor: not-allowed; }
+        .seat.selected { background: var(--success); color: white; transform: scale(1.1); }
+        .seat-map-grid {
+            display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem;
+            margin: 1.5rem 0; padding: 1.5rem; background: #f5f5f7; border-radius: 12px;
+        }
+    </style>
 </head>
 <body>
-	<header>
-		<h1 class="hd">National Ticket Booking Spot</h1>
-		<nav class="home-container">
-			<a href="UserHome.html" class="menu" style="background: var(--primary);">Home</a>
-			<a href="UserViewTrains.html" class="menu">View Trains</a>
-			<a href="TrainBwStn.html" class="menu">Search Route</a>
-			<a href="BookTrains.html" class="menu">My Bookings</a>
-			<a href="Fare.html" class="menu">Fare Enquiry</a>
-			<a href="Availability.html" class="menu">Seats</a>
-			<a href="Profile.html" class="menu">My Profile</a>
-			<a href="index.html" class="menu" onclick="sessionStorage.clear()" style="background: rgba(239, 68, 68, 0.1);">Logout</a>
-		</nav>
-	</header>
-	
-	<main class="tab" style="max-width: 800px; text-align: left;">
-		<div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 3rem;">
-			<div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 800; box-shadow: 0 10px 20px -5px var(--primary);">
-				U
-			</div>
-			<div>
-				<h2 style="font-size: 2rem;">Hello, <span id="user-name" style="color: var(--accent);">Passenger</span></h2>
-				<p style="color: var(--text-muted);">Where would you like to go today?</p>
-			</div>
-		</div>
+    <header>
+        <div class="hd">NITRTC</div>
+        <nav class="home-container">
+            <a href="UserHome.html" class="menu active">Dashboard</a>
+            <a href="#" onclick="logout()" class="menu btn-danger" style="color:white; padding: 0.4rem 1rem; border-radius: 20px;">Logout</a>
+        </nav>
+    </header>
 
-		<div style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); display: grid; gap: 2rem;">
-			<div class="tab" style="margin: 0 !important; width: 100% !important; padding: 2rem; text-align: left;">
-				<h3 style="margin-bottom: 1rem; color: var(--accent);">Quick Actions</h3>
-				<ul style="list-style: none; display: flex; flex-direction: column; gap: 1rem;">
-					<li><a href="TrainBwStn.html" style="color: var(--text-main); text-decoration: none;">🔍 Search Trains Between Stations</a></li>
-					<li><a href="UserViewTrains.html" style="color: var(--text-main); text-decoration: none;">📋 View All Running Trains</a></li>
-					<li><a href="BookTrains.html" style="color: var(--text-main); text-decoration: none;">🎟️ Check My Ticket History</a></li>
-				</ul>
-			</div>
-			
-			<div class="tab" style="margin: 0 !important; width: 100% !important; padding: 2rem; text-align: left; background: linear-gradient(rgba(30, 41, 59, 0.7), rgba(99, 102, 241, 0.1));">
-				<h3 style="margin-bottom: 1rem; color: var(--accent);">Travel News</h3>
-				<p style="font-size: 0.875rem; color: var(--text-muted);">
-					New super-fast express routes added between Mumbai and Delhi. Check Seat Availability for special discounts!
-				</p>
-				<button class="menu" style="margin-top: 1.5rem; width: 100%;">Read More</button>
-			</div>
-		</div>
-	</main>
+    <div class="container animate-up">
+        <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Welcome, <span id="user-name">Passenger</span>!</h1>
+        </div>
 
-	<footer style="margin-top: 5rem;">
-		<p>&copy; 2026 National Inter-city Train Reservation Center</p>
-	</footer>
+        <div class="dashboard-grid">
+            
+            <!-- Booking Flow -->
+            <div>
+                <div class="card" style="margin-bottom: 2rem;">
+                    <h2 class="card-title">🔍 Search Train</h2>
+                    <form onsubmit="searchTrain(event)" style="display: flex; gap: 1rem;">
+                        <input type="number" name="trainnumber" placeholder="Enter Train No (e.g. 10001)" required style="flex: 1;">
+                        <button type="submit" style="width: auto;">Search</button>
+                    </form>
+                </div>
+
+                <div class="card" id="booking-panel" style="display: none; border: 2px solid var(--primary);">
+                    <h2 class="card-title">💺 Graphical Seat Selection</h2>
+                    <div id="train-details" style="margin-bottom: 1rem; color: var(--text-muted);"></div>
+                    <p style="font-size: 0.85rem; font-weight: bold;">Select up to 6 seats:</p>
+                    <div class="seat-map-grid" id="seat-map"></div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;">
+                        <h3>Total Fare: $<span id="total-fare">0.00</span></h3>
+                        <button id="checkout-btn" style="display: none; width: auto; background: var(--success);" onclick="showPaymentModal()">Checkout & Pay</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Flow -->
+            <div>
+                <div class="card">
+                    <h2 class="card-title">🚆 My Tickets & History</h2>
+                    <div id="bookings-list">Loading...</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Payment Gateway Modal -->
+    <div class="modal-overlay" id="payment-modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 1.5rem;">💳 Secure Checkout</h2>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">This is a simulated payment gateway. Enter any details to proceed.</p>
+            <form onsubmit="processPayment(event)">
+                <div class="form-group">
+                    <label>Card Number</label>
+                    <input type="text" placeholder="4111 1111 1111 1111" required>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Expiry (MM/YY)</label>
+                        <input type="text" placeholder="12/26" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>CVV</label>
+                        <input type="text" placeholder="123" required>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button type="button" class="btn-secondary" onclick="closePaymentModal()">Cancel</button>
+                    <button type="submit" id="pay-btn" style="background: var(--success);">Pay Now</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </body>
 </html>

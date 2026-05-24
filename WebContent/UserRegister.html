@@ -1,80 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="ISO-8859-1">
-<title>LOGIN</title>
-<link rel="stylesheet" href="UserHome_Css.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-	const supabaseClient = supabase.createClient(
-		'https://cztenfsxtgxhzshhpzzg.supabase.co',
-		'sb_publishable_Fj7xwztVaTNDwqNgCgHRMQ_TD5hdbmP'
-	)
-
-	async function handleRegister(event) {
-		event.preventDefault();
-		const formData = new FormData(event.target);
-		const user = {
-			mailid: formData.get('mailid'),
-			pword: formData.get('pword'),
-			fname: formData.get('firstname'),
-			lname: formData.get('lastname'),
-			addr: formData.get('address'),
-			phno: parseInt(formData.get('phoneno'))
-		};
-
-		const { error } = await supabaseClient
-			.from('customer')
-			.insert([user]);
-
-		if (error) {
-			alert('Registration Failed: ' + error.message);
-		} else {
-			alert('Registration Successful! Please Login.');
-			window.location.href = 'UserLogin.html';
-		}
-	}
-</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | NITRTC</title>
+    <link rel="stylesheet" href="UserHome_Css.css">
 </head>
 <body>
-	<header>
-		<h1 class="hd">National Ticket Booking Spot</h1>
-		<div class="main">
-			<span class="menu"> <a href="UserLogin.html">Login as User</a>
-			</span> <span class="menu"> <a href="UserRegister.html">New User
-					Register</a>
-			</span> <span class="menu"> <a href="AdminLogin.html">Login as
-					Admin</a>
-			</span>
-		</div>
-	</header>
-	<table class="tab brown hd">
-		<tr>
-			<td>New User Registration</td>
-		</tr>
-	</table>
+    <header>
+        <div class="hd">NITRTC</div>
+        <nav class="home-container">
+            <a href="index.html" class="menu">Back to Login</a>
+        </nav>
+    </header>
 
-	<table class="tab green">
+    <div class="container animate-up">
+        <div class="hero" style="padding-top: 2rem;">
+            <h1 class="text-gradient">Join the Journey.</h1>
+            <p>Create an account to book tickets, manage trips, and access exclusive fares.</p>
+            
+            <div class="glass card" style="max-width: 600px; margin: 0 auto; text-align: left; padding: 2.5rem;">
+                <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Create Your Account</h2>
+                
+                <div id="error-msg" style="display: none; background: rgba(244, 63, 94, 0.1); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-weight: 600;"></div>
 
-		<tr>
-			<td>
-				<form onsubmit="handleRegister(event)" method="post">
-					Email Id : <input type="email" name="mailid"
-						placeholder="Enter your emailId" required><br /> <br />
-					Password : <input type="password" name="pword" required><br />
-					<br /> FirstName: <input type="text" name="firstname" required><br />
-					<br /> Last Name: <input type="text" name="lastname" required><br />
-					<br /> Address : <input type="text" name="address" required><br />
-					<br /> Phone No : <input type="number" name="phoneno" required><br />
-					<br /> <input type="submit"
-						value=" I AGREE FOR ALL TERMS & CONDITIONS ! REGISTER ME "
-						style="text-align: center">
-				</form>
-			</td>
+                <form id="registerForm" action="/userreg" method="POST">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>First Name</label>
+                            <input type="text" name="firstname" placeholder="John" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name</label>
+                            <input type="text" name="lastname" placeholder="Doe" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" name="mailid" placeholder="hello@example.com" required>
+                    </div>
 
-		</tr>
-	</table>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" name="pword" placeholder="••••••••" required>
+                    </div>
 
+                    <div class="form-group">
+                        <label>Physical Address</label>
+                        <input type="text" name="address" placeholder="123 Railway Street" required>
+                    </div>
 
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="number" name="phoneno" placeholder="9876543210" required>
+                    </div>
+
+                    <button type="submit" id="submitBtn">Agree & Register Me</button>
+                </form>
+                
+                <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+                    Already have an account? <a href="index.html" style="color: var(--secondary); text-decoration: none;">Sign in here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', (e) => {
+            const btn = document.getElementById('submitBtn');
+            btn.innerHTML = 'Registering...';
+            btn.style.opacity = '0.7';
+        });
+    </script>
 </body>
 </html>
